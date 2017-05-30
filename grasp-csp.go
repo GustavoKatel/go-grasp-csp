@@ -78,9 +78,9 @@ func Construct(strings []string, alphabet []string, stringSize int, alpha int) s
 
 	for i:=0; len(x) < stringSize; i++ {
 
-		lcr := CountAndSort(strings, i, alpha)
-		chosen := rand.Intn(len(lcr))
-		x = x + lcr[chosen].char
+		rcl := CountAndSort(strings, i, alpha)
+		chosen := rand.Intn(len(rcl))
+		x = x + rcl[chosen].char
 
 	}
 
