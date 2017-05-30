@@ -1,6 +1,4 @@
 
-# The basics
-
 ## Greedy implementation
 
 The initial solution is constructed interactively by sorting the most common characters in each position of the set of strings. The characters are then added to the RCL. The size of the RCL, alpha, determines the greediness of the algorithm. The chosen character is them randomly selected from the RCL.
