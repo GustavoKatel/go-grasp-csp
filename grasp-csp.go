@@ -19,6 +19,35 @@ type CountAndSortResult struct {
 	count int
 }
 
+/*
+res: ccc
+
+abc
+acc
+cdd
+dda
+
+[a] = 2
+[c] = 1
+[d] = 1
+
+reverse
+[2] = [ a ]
+[1] = [c, d]
+[3] = [c, d]
+
+sorting
+[2, 1, 3]
+
+sorted
+[3, 2, 1]
+
+most common chars
+[ {a, 2}, {c, 1}, {d, 1} ]
+
+aab
+aac
+*/
 func CountAndSort(strings []string, index int, maxChars int) []CountAndSortResult {
 
 	charFreq := make(map[byte]int)
@@ -195,8 +224,9 @@ func main() {
 	}
 	// fmt.Println("Strings:", strings)
 
-	closest, lower, upper := CSP(strings, alphabet, stringsLength, maxIterations, greedinessFactor, neighborhoodTotal)
+	_, lower, upper := CSP(strings, alphabet, stringsLength, maxIterations, greedinessFactor, neighborhoodTotal)
 
-	fmt.Println("Closest:", closest, "lower:", lower, "upper:", upper)
+	// fmt.Println("Closest:", closest, "lower:", lower, "upper:", upper)
+	fmt.Println(lower, upper)
 
 }
