@@ -15,7 +15,7 @@ import (
 )
 
 type CountAndSortResult struct {
-	char string
+	char byte
 	count int
 }
 
@@ -48,7 +48,7 @@ most common chars
 aab
 aac
 */
-func CountAndSort(strings []string, index int, maxChars int) []CountAndSortResult {
+func CountAndSort(strings []string, index int) []CountAndSortResult {
 
 	charFreq := make(map[byte]int)
 
@@ -71,16 +71,12 @@ func CountAndSort(strings []string, index int, maxChars int) []CountAndSortResul
 	var mostCommonChars []CountAndSortResult
 	for _, k := range sortingArray {
 		for _, c := range reverseMap[k] {
-			mostCommonChars = append(mostCommonChars, CountAndSortResult{string(c), k})
+			mostCommonChars = append(mostCommonChars, CountAndSortResult{c, k})
 		}
 	}
 
 	// fmt.Println("mostComm:", mostCommonChars)
-	if len(mostCommonChars) > maxChars {
-		return mostCommonChars[:maxChars]
-	} else {
-		return mostCommonChars
-	}
+	return mostCommonChars
 }
 
 func Cost(value string, target string) int {
@@ -101,15 +97,27 @@ func CostSum(value string, strings []string, size int) int {
 
 }
 
-func Construct(strings []string, alphabet []string, stringSize int, alpha int) string {
+func Construct(strings []string, alphabet []string, stringSize int, alpha float64) string {
 
 	x := ""
 
 	for i:=0; len(x) < stringSize; i++ {
 
-		rcl := CountAndSort(strings, i, alpha)
+		allCandidates := CountAndSort(strings, i)
+		min := allCandidates[len(allCandidates)-1].count
+		max := allCandidates[0].count
+		threshold := float64(max - min) * alpha
+
+		var rcl []byte
+		for _,element := range allCandidates {
+
+			if float64(element.count) > threshold {
+				rcl = append(rcl, element.char)
+			}
+
+		}
 		chosen := rand.Intn(len(rcl))
-		x = x + rcl[chosen].char
+		x = x + string(rcl[chosen])
 
 	}
 
@@ -127,7 +135,7 @@ func NeighborhoodRandom(value string, alphabet []string) string {
 }
 
 // Return closest string, lower bound, upper bound
-func CSP(strings []string, alphabet []string, stringSize int, maxIterations int, alpha int, NhbMax int) (string,int,int) {
+func CSP(strings []string, alphabet []string, stringSize int, maxIterations int, alpha float64, NhbMax int) (string,int,int) {
 
 	cost := 0
 	var res string
@@ -176,7 +184,7 @@ func usage() {
 func main() {
 
 	maxIterations := 10
-	greedinessFactor := 10
+	greedinessFactor := 0.5
 	neighborhoodTotal := 3
 
 	if len(os.Args) < 2 {
