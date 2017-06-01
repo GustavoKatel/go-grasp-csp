@@ -19,6 +19,11 @@ type CountAndSortResult struct {
 	count int
 }
 
+type LocalSearchResult struct {
+	str string
+	cost int
+}
+
 /*
 res: ccc
 
@@ -134,8 +139,92 @@ func NeighborhoodRandom(value string, alphabet []string) string {
 	return string(chars)
 }
 
+func LocalSearchRandom(value string, currentCost int, strings []string, stringSize int, alphabet []string) (string,int) {
+
+	NhbMax := 10
+	for i:=0; i<NhbMax; i++ {
+		nhbValue := NeighborhoodRandom(value, alphabet)
+		nhbCost := CostSum(nhbValue, strings, stringSize)
+
+		// cost check
+		if nhbCost < currentCost {
+			value = nhbValue
+			currentCost = nhbCost
+		}
+	}
+
+	return value,currentCost
+}
+
+func IncrementAlphabetValue(value string, position int, alphabet []string) string {
+
+	valueChars := []byte(value)
+
+	if position > len(value) {
+
+		return string(valueChars)
+
+	}
+
+	alphabetPos := -1
+	for i, char := range alphabet {
+		if char[0] == valueChars[position] {
+			alphabetPos = i
+			break
+		}
+	}
+
+	valueChars[position] = alphabet[ (alphabetPos + 1) % len(alphabet) ][0] // <- convert to byte
+
+	return string(valueChars)
+}
+
+func LocalSearchIterative(value string, currentCost int, strings []string, stringSize int, alphabet []string) (string,int) {
+
+	res := value
+	cost := currentCost
+
+	stop := false
+
+	for stop == false {
+
+		// initial: abc
+		// neighbors:
+		// bca
+		// bcb
+		// baa
+		// bab
+		// ...
+		neighbor := IncrementAlphabetValue(res, 0, alphabet)
+		for i:=1; i<stringSize; i++ {
+			neighbor = IncrementAlphabetValue(neighbor, i, alphabet)
+		}
+
+		stop = true
+
+		// total neighbors: (alphabetSize-1) ^ stringSize
+		for i:=0; i<stringSize; i++ {
+
+			for j:=0; j<len(alphabet)-1; j++ {
+				newCost := CostSum(neighbor, strings, stringSize)
+				if newCost < cost {
+					res = neighbor
+					cost = newCost
+					stop = false
+				}
+				neighbor = IncrementAlphabetValue(neighbor, i, alphabet)
+			}
+
+		}
+
+	}
+
+	return res, cost
+
+}
+
 // Return closest string, lower bound, upper bound
-func CSP(strings []string, alphabet []string, stringSize int, maxIterations int, alpha float64, NhbMax int) (string,int,int) {
+func CSP(strings []string, alphabet []string, stringSize int, maxIterations int, alpha float64) (string,int,int) {
 
 	cost := 0
 	var res string
@@ -145,16 +234,9 @@ func CSP(strings []string, alphabet []string, stringSize int, maxIterations int,
 		cost = CostSum(res, strings, stringSize)
 
 		// busca local
-		for i:=0; i<NhbMax; i++ {
-			nhbValue := NeighborhoodRandom(res, alphabet)
-			nhbCost := CostSum(nhbValue, strings, stringSize)
+		// res,cost = LocalSearchRandom(res, cost, strings, stringSize, alphabet)
+		res,cost = LocalSearchIterative(res, cost, strings, stringSize, alphabet)
 
-			// cost check
-			if nhbCost < cost {
-				res = nhbValue
-				cost = nhbCost
-			}
-		}
 	}
 
 	lower := math.MaxInt32
@@ -185,7 +267,6 @@ func main() {
 
 	maxIterations := 10
 	greedinessFactor := 0.5
-	neighborhoodTotal := 3
 
 	if len(os.Args) < 2 {
 		usage()
@@ -232,7 +313,7 @@ func main() {
 	}
 	// fmt.Println("Strings:", strings)
 
-	_, lower, upper := CSP(strings, alphabet, stringsLength, maxIterations, greedinessFactor, neighborhoodTotal)
+	_, lower, upper := CSP(strings, alphabet, stringsLength, maxIterations, greedinessFactor)
 
 	// fmt.Println("Closest:", closest, "lower:", lower, "upper:", upper)
 	fmt.Println(lower, upper)
